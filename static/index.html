@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GraphPulse AI — Interactive GCN Graph Intelligence Platform</title>
+<meta name="description" content="Explore the Graph. Understand the Prediction.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to graph explorer</a>
+
+<header class="nav">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">◉</span>
+    <div>
+      <div class="brand-name">GRAPHPULSE AI</div>
+      <div class="brand-sub">GRAPH INTELLIGENCE LAB</div>
+    </div>
+  </div>
+  <div class="status-row" aria-live="polite">
+    <span class="chip" id="chipApi"><i class="dot"></i><span id="chipApiText">CHECKING API</span></span>
+    <span class="chip" id="chipModel"><i class="dot"></i><span id="chipModelText">MODEL —</span></span>
+    <span class="chip" id="chipOrt"><i class="dot"></i><span id="chipOrtText">ONNX RUNTIME</span></span>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <canvas id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <p class="kicker">INTERACTIVE GRAPH INTELLIGENCE</p>
+      <h1>EXPLORE THE GRAPH.<br>UNDERSTAND THE PREDICTION.</h1>
+      <p class="lead">GraphPulse AI is an interactive Graph Neural Network laboratory for exploring the Cora citation network and visualizing node-level GCN predictions through ONNX Runtime.</p>
+      <div class="cta-row">
+        <button class="btn primary" id="btnExplore" type="button">EXPLORE CORA GRAPH</button>
+        <button class="btn ghost" id="btnModelInfo" type="button">MODEL INFORMATION</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="metrics" aria-label="Dataset metrics">
+    <div class="metric"><span class="metric-id">N-01</span><div class="metric-label">NODES</div><div class="metric-val" id="mNodes" data-target="2708">0</div><div class="metric-cap">NETWORK VOLUME</div></div>
+    <div class="metric"><span class="metric-id">E-02</span><div class="metric-label">EDGES</div><div class="metric-val" id="mEdges" data-target="10556">0</div><div class="metric-cap">DIRECTED CITATION LINKS</div></div>
+    <div class="metric"><span class="metric-id">F-03</span><div class="metric-label">FEATURES / NODE</div><div class="metric-val" id="mFeat" data-target="1433">0</div><div class="metric-cap">BAG-OF-WORDS DIMENSION</div></div>
+    <div class="metric"><span class="metric-id">C-04</span><div class="metric-label">CLASSES</div><div class="metric-val" id="mClass" data-target="7">0</div><div class="metric-cap">RESEARCH TOPICS</div></div>
+  </section>
+
+  <section class="lab" id="explorer">
+    <div class="panel graph-panel">
+      <div class="panel-head">
+        <h2>GRAPH EXPLORER</h2>
+        <span class="tag" id="graphTag">SAMPLE OF CORA · LOADING</span>
+      </div>
+      <form class="search" id="searchForm" novalidate>
+        <label for="nodeInput" class="sr">Node ID</label>
+        <input id="nodeInput" type="number" inputmode="numeric" min="0" max="2707" placeholder="SEARCH NODE ID... (0–2707)" autocomplete="off">
+        <button class="btn primary" type="submit">EXPLORE</button>
+        <button class="btn ghost" type="button" id="btnRandom">RANDOM NODE</button>
+      </form>
+      <p class="field-error" id="searchError" role="alert" hidden></p>
+      <div class="canvas-wrap">
+        <canvas id="graphCanvas" tabindex="0" aria-label="Interactive Cora graph sample. Click a node to run inference."></canvas>
+        <div class="tooltip" id="tooltip" hidden></div>
+        <div class="zoom-ctl">
+          <button type="button" id="zoomIn" aria-label="Zoom in">+</button>
+          <button type="button" id="zoomOut" aria-label="Zoom out">−</button>
+          <button type="button" id="zoomReset" aria-label="Reset view">⟲</button>
+        </div>
+        <div class="legend" id="legend" aria-label="Class legend"></div>
+      </div>
+      <p class="note">Nodes are real Cora IDs classified by your model in one batch call. Edges drawn between them are an illustrative layout, not true citations: the API does not expose the adjacency list.</p>
+    </div>
+
+    <aside class="side">
+      <div class="panel inference" id="inferencePanel">
+        <div class="panel-head"><h2>NODE INFERENCE</h2><span class="tag" id="infTag">IDLE</span></div>
+        <div class="inf-body">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 200 200" class="ring" aria-hidden="true">
+              <circle cx="100" cy="100" r="88" class="ring-bg"/>
+              <circle cx="100" cy="100" r="88" class="ring-fg" id="ringFg"/>
+            </svg>
+            <div class="ring-text">
+              <div class="ring-pct" id="confPct">—</div>
+              <div class="ring-sub">CONFIDENCE</div>
+            </div>
+          </div>
+          <dl class="kv">
+            <div><dt>NODE</dt><dd id="infNode">—</dd></div>
+            <div><dt>PREDICTED CLASS</dt><dd id="infClass">—</dd></div>
+            <div><dt>CLASS ID</dt><dd id="infClassId">—</dd></div>
+          </dl>
+        </div>
+        <div class="loader" id="loader" hidden aria-live="polite">
+          <div class="loader-bar"><i id="loaderFill"></i></div>
+          <div class="loader-step" id="loaderStep"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>NODE DETAILS</h2></div>
+        <dl class="kv grid2">
+          <div><dt>NODE IDENTIFIER</dt><dd id="ndId">—</dd></div>
+          <div><dt>GRAPH POSITION</dt><dd id="ndPos">NONE SELECTED</dd></div>
+          <div><dt>PREDICTION</dt><dd id="ndPred">—</dd></div>
+          <div><dt>CLASS ID</dt><dd id="ndClass">—</dd></div>
+          <div><dt>CONFIDENCE</dt><dd id="ndConf">—</dd></div>
+          <div><dt>GRAPH CONNECTIONS</dt><dd id="ndConn">NOT EXPOSED BY API</dd></div>
+        </dl>
+      </div>
+    </aside>
+  </section>
+
+  <section class="lab two">
+    <div class="panel">
+      <div class="panel-head"><h2>CLASS PROBABILITY MATRIX</h2></div>
+      <div class="bars" id="bars"><p class="empty">Select a node to see its class probabilities.</p></div>
+      <details class="logits">
+        <summary>LOGIT INSPECTOR</summary>
+        <table>
+          <thead><tr><th scope="col">CLASS</th><th scope="col">LOGIT</th><th scope="col">PROBABILITY</th></tr></thead>
+          <tbody id="logitBody"><tr><td colspan="3" class="empty">No node selected.</td></tr></tbody>
+        </table>
+        <p class="note">Logits are the raw outputs produced by the GCN before softmax normalization.</p>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>CLASS CONSTELLATION</h2></div>
+      <svg id="constellation" viewBox="0 0 440 400" role="img" aria-label="Class constellation showing probability for each class"></svg>
+    </div>
+  </section>
+
+  <section class="lab two" id="modelSection">
+    <div class="panel">
+      <div class="panel-head"><h2>MODEL CARD</h2><span class="tag">GET /info</span></div>
+      <dl class="kv rows" id="modelCard"><div><dt>STATUS</dt><dd>Loading…</dd></div></dl>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>SYSTEM DIAGNOSTICS</h2><span class="tag">GET /health</span></div>
+      <ul class="term" id="diag" aria-live="polite"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">GRAPHPULSE AI · GCN on Cora · FastAPI + ONNX Runtime</footer>
+<div class="toasts" id="toasts" role="status" aria-live="assertive"></div>
+<script src="script.js"></script>
+</body>
+</html>
